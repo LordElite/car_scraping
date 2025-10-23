@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vehicle Finder (Copart + IAAI)</title>
+  <!-- Usa tu style.css existente -->
+  <link rel="stylesheet" href="/style.css" />
+  <!-- script.js ya contiene la lógica para Copart e IAAI -->
+  <script defer src="/script.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body>
+  <h1 style="text-align:center; margin-top:12px;">Vehicle Finder (Copart &amp; IAAI)</h1>
+
+  <div class="container" style="margin-top:20px;">
+    <!-- COPART (left) -->
+    <section id="copart-section">
+      <h2>Copart Search</h2>
+
+      <!-- Form: repliqué tus campos originales -->
+      <form id="copartForm" style="max-width:720px; margin: 0 auto;">
+        <label>Condition:</label>
+        <select name="condition">
+          <option value="all">All</option>
+          <option value="used">Used</option>
+          <option value="salvage">Salvage</option>
+        </select><br><br>
+
+        <label>Type:</label>
+        <select name="type">
+          <option value="AUTOMOBILE">Automobile</option>
+          <option value="MOTORCYCLE">Motorcycle</option>
+          <option value="TRUCK">Truck</option>
+        </select><br><br>
+
+        <label>Odometer (miles):</label><br>
+        <input type="number" name="odometerFrom" placeholder="From" min="0">
+        <input type="number" name="odometerTo" placeholder="To" min="0"><br><br>
+
+        <label>Year:</label><br>
+        <input type="number" id="yearFrom" name="yearFrom" placeholder="From" min="1980">
+        <input type="number" id="yearTo" name="yearTo" placeholder="To" min="1980"><br><br>
+
+        <label>Damage Type:</label>
+        <input type="text" name="damage" placeholder="e.g. Front End"><br><br>
+
+        <label>Make:</label>
+        <input type="text" name="make" placeholder="e.g. Toyota"><br><br>
+
+        <label>Model:</label>
+        <input type="text" name="model" placeholder="e.g. Corolla"><br><br>
+
+        <label>Location:</label>
+        <input type="text" name="location" placeholder="City or State"><br><br>
+
+        <button type="submit">Search Copart</button>
+      </form>
+
+      <!-- loader + results area (IDs used by script.js) -->
+      <div id="copart-loader" class="loader hidden" style="margin-top:14px;"></div>
+      <div id="copart-results" style="margin-top:12px;"></div>
+    </section>
+
+    <!-- IAAI  -->
+    <section id="iaai-section">
+      <h2>IAAI Vehicle Lookup</h2>
+
+      <form id="iaaiForm" style="max-width:520px; margin:0 auto;">
+        <label for="stockNumber"><strong>Stock Number or Full Vehicle URL:</strong></label>
+        <input 
+          type="text" 
+          id="stockNumber" 
+          name="stockNumber"
+          placeholder="e.g. 43959815 or https://www.iaai.com/VehicleDetail/43959815~US"
+          required
+          style="width:100%; padding:10px; margin-top:6px; border-radius:6px; border:1px solid #ccc;"
+        >
+
+        <p style="font-size:13px; color:#555; text-align:center; margin-top:8px;">
+          💡 You can enter either a <strong>Stock #</strong> or a full <strong>IAAI URL</strong>.
+        </p>
+
+        <button type="submit" style="width:100%; margin-top:10px;">Search IAAI</button>
+      </form>
+
+      <!-- Loader animado -->
+      <div id="iaai-loader" class="loader hidden" style="margin-top:18px;"></div>
+
+      <!-- Aquí se inyectará la tabla -->
+      <div id="iaai-results" style="margin-top:20px;"></div>
+    </section>
+
+
+  </div>
+
+  <!-- Extra: year validation logic (keeps behavior igual al HTML original) -->
+  <script>
+    (function () {
+      const yearFrom = document.getElementById('yearFrom');
+      const yearTo = document.getElementById('yearTo');
+      if (!yearFrom || !yearTo) return;
+
+      yearFrom.addEventListener('input', () => {
+        // keep To >= From
+        yearTo.min = yearFrom.value || yearTo.min;
+        if (yearTo.value && parseInt(yearTo.value) < parseInt(yearFrom.value)) {
+          yearTo.value = yearFrom.value;
+        }
+      });
+
+      // Prevent invalid submit if yearFrom > yearTo (extra safety)
+      const copartForm = document.getElementById('copartForm');
+      copartForm.addEventListener('submit', (e) => {
+        const f = parseInt(yearFrom.value) || 0;
+        const t = parseInt(yearTo.value) || 0;
+        if (f && t && f > t) {
+          e.preventDefault();
+          alert('Year "From" cannot be greater than Year "To". Please correct the range.');
+        }
+      });
+    })();
+  </script>
+
+  <!-- Small inline CSS fallbacks in case some rules are missing from style.css -->
+  <style>
+    /* Ensure two-column layout and spacing (style.css already has container/section rules) */
+    .container { gap: 24px; align-items: flex-start; }
+    section { width: 48%; }
+    /* Make results scroll horizontally if many columns */
+    #copart-results .table-container,
+    #iaai-results .table-container {
+      overflow-x: auto;
+    }
+    /* Keep loader centering */
+    .loader { margin: 14px auto; }
+    /* Ensure inputs expand on small screens */
+    @media (max-width: 900px) {
+      .container { flex-direction: column; }
+      section { width: 100%; }
+    }
+  </style>
+</body>
+</html>
 
