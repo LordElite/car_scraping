@@ -72,7 +72,7 @@ app.get("/search-copart", async (req, res) => {
   try {
     const response = await axios.post(copartActor, {
       startUrl: `https://www.copart.com/lotSearchResults/?${searchParams.toString()}`,
-      maxItems: 10,
+      maxItems: 100,
     });
 
     const data = response.data;
@@ -188,3 +188,4 @@ app.post("/search-iaai", async (req, res) => {
 
 
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
