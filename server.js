@@ -78,16 +78,16 @@ app.get("/search-copart", async (req, res) => {
     const data = response.data;
 
     if (!data || data.length === 0) {
-      return res.json({ vehicles: [] });
+      return res.send(`<p style="text-align:center;">No results found for <strong>${query}</strong>.</p>`);
     }
-
+    
+    // --- Normalización ---
     const normalize = (item) => ({
       Make: item.make || "N/A",
       Model: item.model || "N/A",
-      Year: item.year || "N/A",
+      Year: parseInt(item.year) || null,
       VinNumber: item.vin || "N/A",
       PrimaryDamage: item.primary_damage || "N/A",
-      SecondaryDamage: item.secondary_damage || "N/A",
       DriveTrain: item.drive || "N/A",
       EngineType: item.engine || "N/A",
       Color: item.color || "N/A",
@@ -96,9 +96,28 @@ app.get("/search-copart", async (req, res) => {
       Location: item.location || "N/A",
       LotNumber: item.lot_number || "N/A",
       ItemURL: item.item_url || "N/A",
+      Score: computeScore(item),
     });
+    
+    // --- Filtro adicional por año ---
+    const yearFrom = parseInt(req.query.yearFrom) || null;
+    const yearTo = parseInt(req.query.yearTo) || null;
+    
+    let vehicles = data.map(normalize);
+    
+    if (yearFrom || yearTo) {
+      vehicles = vehicles.filter(v => {
+        if (!v.Year) return false;
+        if (yearFrom && v.Year < yearFrom) return false;
+        if (yearTo && v.Year > yearTo) return false;
+        return true;
+      });
+    }
+    
+    if (vehicles.length === 0) {
+      return res.send(`<p style="text-align:center;">No vehicles found between ${yearFrom || "?"} and ${yearTo || "?"}.</p>`);
+    }
 
-    const vehicles = data.map(normalize);
     res.json({ vehicles });
 
   } catch (error) {
@@ -164,6 +183,7 @@ app.post("/search-iaai", async (req, res) => {
     res.status(500).json({ error: "Error fetching IAAI data." });
   }
 });
+
 
 
 
